@@ -2,119 +2,105 @@
 
 public class Automate
 {
-    public List<string> States; 
-    public List<char> Alphabet;
-    public HashSet<string> FinallyStates = new HashSet<string>();
-    public string StartState = "q0";
-    List<TransitionFunction> TransitionFunctions;
+    private const string StartState = "q0";
     
+    private readonly List<string> _states;
+    private readonly HashSet<string> _finallyStates = new();
+    private List<TransitionFunction> _transitionFunctions;
 
-    public Automate(List<string> fileLines, List<char> alphabet)
+    public Automate(List<string> fileLines)
     {
-        States = new();
-        TransitionFunctions = new();
-
-        Alphabet = alphabet;
+        _states = new List<string>();
+        _transitionFunctions = new List<TransitionFunction>();
+        
         foreach(var fileLine in fileLines)
         {
             ExecuteDescriptionLine(fileLine);
         }
-        States = States.Distinct().ToList();
+        _states = _states.Distinct().ToList();
         CheckFinallyStates();
     }
 
 
-    private void AddTransitionFunc(string curState ,char symbol, string nextState)
+    private void AddTransitionFunc(string curState, char symbol, string nextState)
     {
-        TransitionFunctions.Add(new TransitionFunction(curState, symbol, nextState));
+        _transitionFunctions.Add(new TransitionFunction(curState, symbol, nextState));
     }
 
     private void ExecuteDescriptionLine(string line)
     {
-        int i = 0;
-        string curState, nextState;
-        char symbol;
+        var i = 0;
 
-
-        curState = ReadState(line, ref i);
-        States.Add(curState);
+        var curState = ReadState(line, ref i);
+        _states.Add(curState);
 
         i += 1;
-        symbol = line[i];
+        var symbol = line[i];
 
         i += 2;
 
-        nextState = ReadState(line, ref i);
-        States.Add(nextState);
+        var nextState = ReadState(line, ref i);
+        _states.Add(nextState);
         AddTransitionFunc(curState, symbol, nextState);
-    }
-
-    public void PrintStates()
-    {
-        foreach(var state in States)
-            Console.WriteLine(state);
     }
 
     public void PrintTransitionFunctions()
     {
-        foreach(var func in TransitionFunctions)
+        foreach(var func in _transitionFunctions)
             Console.WriteLine($"{func.CurrentState} : {func.Symbol} - {func.NextState}");
         Console.WriteLine();
     }
 
     public bool IsAutomateDeterministic()
     {
-        foreach(var func in TransitionFunctions.GroupBy(tf => new { tf.CurrentState, tf.Symbol}))
-        {
-            if (func.Count() > 1) return false;
-        }
-        return true;
+        return _transitionFunctions
+            .GroupBy(tf => new { tf.CurrentState, tf.Symbol })
+            .All(func => func.Count() <= 1);
     }
 
     public bool IsExecutableForInputLine(string inputLine)
     {
-        string curState = StartState;
+        var curState = StartState;
+        
         foreach(var symbol in inputLine)
         {
-            if(TransitionFunctions.Where(tf => tf.CurrentState.Equals(curState) && tf.Symbol.Equals(symbol)).Count() != 1) return false;
-            curState = TransitionFunctions.Where(tf => tf.CurrentState.Equals(curState) && tf.Symbol.Equals(symbol)).First().NextState;
+            if(_transitionFunctions.Count(tf => tf.CurrentState.Equals(curState) && tf.Symbol.Equals(symbol)) != 1)
+                return false;
+            
+            curState = _transitionFunctions.First(tf => tf.CurrentState.Equals(curState) && tf.Symbol.Equals(symbol)).NextState;
         }
 
-        if(!FinallyStates.Contains(curState)) return false;
-        return true;
+        return _finallyStates.Contains(curState);
     }
 
-    public void Determization()
+    public void Determination()
     {
 
         while (!IsAutomateDeterministic())
         {
             List<List<string>> newStatesByPair = new();
             List<string> newStatesNames = new();
-            foreach (var func in TransitionFunctions.GroupBy(tf => new { tf.CurrentState, tf.Symbol }))
+            foreach (var func in _transitionFunctions.GroupBy(tf => new { tf.CurrentState, tf.Symbol }))
             {
-                if (func.Count() > 1)
-                {
-                    var newStateName = "";
-                    var sortedNextStatsArray = func.OrderBy(n => n.NextState).ToArray();
-                    var backupStates = new List<string>();
-                    var isFinal = false;
+                if (func.Count() <= 1)
+                    continue;
+                
+                var newStateName = "";
+                var sortedNextStatsArray = func.OrderBy(n => n.NextState).ToArray();
+                var backupStates = new List<string>();
                     
-                    foreach (var dest in sortedNextStatsArray)
-                    {
-                        newStateName += dest.NextState;
-                        backupStates.Add(dest.NextState);
-                        if (FinallyStates.Contains(dest.NextState)) isFinal = true; 
-                    }
-
-                    newStatesByPair.Add(backupStates);
-                    newStatesNames.Add(newStateName);
-
-                    TransitionFunctions.RemoveAll(tf => tf.CurrentState == func.Key.CurrentState && tf.Symbol == func.Key.Symbol);
-                    TransitionFunctions.Add(new TransitionFunction(func.Key.CurrentState, func.Key.Symbol, newStateName));
-                    States.Add(newStateName);
-
+                foreach (var dest in sortedNextStatsArray)
+                {
+                    newStateName += dest.NextState;
+                    backupStates.Add(dest.NextState);
                 }
+
+                newStatesByPair.Add(backupStates);
+                newStatesNames.Add(newStateName);
+
+                _transitionFunctions.RemoveAll(tf => tf.CurrentState == func.Key.CurrentState && tf.Symbol == func.Key.Symbol);
+                _transitionFunctions.Add(new TransitionFunction(func.Key.CurrentState, func.Key.Symbol, newStateName));
+                _states.Add(newStateName);
             }
 
             // СДЕЛАЙТЕ ВИД, ЧТО НЕ ВИДИТЕ ЭТО
@@ -123,7 +109,7 @@ public class Automate
             {
                 foreach (var newStates in newStatesByPair[i])
                 {
-                    foreach (var f in TransitionFunctions)
+                    foreach (var f in _transitionFunctions)
                     {
                         if (newStates == f.CurrentState)
                         {
@@ -134,21 +120,33 @@ public class Automate
             }
 
             foreach (var f in newTransF)
-                TransitionFunctions.Add(f);
+                _transitionFunctions.Add(f);
 
-            TransitionFunctions = DeleteRepeatFunctions();
+            _transitionFunctions = DeleteRepeatFunctions();
 
         }
         CheckFinallyStates();
         Console.WriteLine("Automate is Determizated!\n");
     }
+    
+    private static string ReadState(string analyzingLine, ref int index)
+    {
+        var state = "";
+        while (char.IsDigit(analyzingLine[index]) || char.IsLetter(analyzingLine[index]))
+        {
+            state += analyzingLine[index];
+            index++;
+            if (analyzingLine.Length == index) break;
+        }
+        return state;
+    }
 
     private List<TransitionFunction> DeleteRepeatFunctions()
     {
-        List<TransitionFunction> transitions = new List<TransitionFunction>();
-        foreach (var item in TransitionFunctions)
+        var transitions = new List<TransitionFunction>();
+        foreach (var item in _transitionFunctions)
         {
-            bool isEntry = false;
+            var isEntry = false;
             foreach (var item2 in transitions)
             {
                 if (item.Equals(item2))
@@ -163,22 +161,8 @@ public class Automate
 
     private void CheckFinallyStates()
     {
-        foreach(var state in States)
-        {
-            if(state.Contains("f")) FinallyStates.Add(state);
-        }
-    }
-
-    private string ReadState(string analyzingLine, ref int index)
-    {
-        var state = "";
-        while (char.IsDigit(analyzingLine[index]) || char.IsLetter(analyzingLine[index]))
-        {
-            state += analyzingLine[index];
-            index++;
-            if (analyzingLine.Length == index) break;
-        }
-        return state;
+        foreach (var state in _states.Where(state => state.Contains("f")))
+            _finallyStates.Add(state);
     }
 }
 

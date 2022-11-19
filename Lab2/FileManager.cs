@@ -2,7 +2,7 @@
 public class FileManager
 {
     private readonly FileInfo _fileInfo;
-    public List<string>? FileLines;
+    public List<string>? FileLines { get; private set; }
 
     public FileManager(string path)
     {
@@ -19,14 +19,6 @@ public class FileManager
 
         var stringArray = File.ReadAllLines(_fileInfo.FullName);
         FileLines = new List<string>(stringArray);
-    }
-
-    public void PrintFileByLines()
-    {
-        foreach(var line in FileLines)
-        {
-            Console.WriteLine(line);
-        }
     }
 }
 

@@ -1,10 +1,10 @@
 ﻿namespace Lab2;
 
-internal class TransitionFunction
+public class TransitionFunction
 {
-    public string   CurrentState;
-    public char     Symbol;
-    public string   NextState;
+    public string CurrentState { get; }
+    public char Symbol { get; }
+    public string NextState { get; }
 
     public TransitionFunction(string curState, char symbol, string nextState)
     {
@@ -15,9 +15,8 @@ internal class TransitionFunction
 
     public bool Equals(TransitionFunction transitionFunction2)
     {
-        if (CurrentState == transitionFunction2.CurrentState &&
-            Symbol == transitionFunction2.Symbol &&
-            NextState == transitionFunction2.NextState) return true;
-        return false;
+        return CurrentState == transitionFunction2.CurrentState &&
+               Symbol == transitionFunction2.Symbol &&
+               NextState == transitionFunction2.NextState;
     }
 }

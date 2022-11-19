@@ -1,21 +1,17 @@
 ﻿namespace Lab2;
 
-internal class CodeAnalyzer : IAnalyzer
+public class CodeAnalyzer : IAnalyzer
 {
-    private List<char> _alphabet = new();
+    private readonly List<char> _alphabet;
 
     public CodeAnalyzer(List<char> alphabet)
     {
         _alphabet = alphabet;
     }
 
-    public bool IsAutomatDescriptionCorrect(List<string> inputLines)
+    public bool IsAutomateDescriptionCorrect(List<string> inputLines)
     {
-        foreach (var line in inputLines)
-            if (!IsDescriptionLineCorrect(line))
-                return false;
-
-        return true;
+        return inputLines.All(IsDescriptionLineCorrect);
     }
 
     public bool IsDescriptionLineCorrect(string analyzingLine)
@@ -35,6 +31,7 @@ internal class CodeAnalyzer : IAnalyzer
             Console.WriteLine($"Incorrect symbol - {analyzingLine[i]}");
             return false;
         }
+
         i++;
 
         if (analyzingLine.Length == i)
@@ -48,6 +45,7 @@ internal class CodeAnalyzer : IAnalyzer
             Console.WriteLine($"Incorrect symbol - {analyzingLine[i]}");
             return false;
         }
+
         i++;
 
         if (analyzingLine.Length == i)
@@ -62,6 +60,7 @@ internal class CodeAnalyzer : IAnalyzer
             Console.WriteLine($"Incorrect symbol - {analyzingLine[i]}");
             return false;
         }
+
         i++;
 
         if (analyzingLine.Length == i)
@@ -72,13 +71,11 @@ internal class CodeAnalyzer : IAnalyzer
 
         ReadState(analyzingLine, ref i);
 
-        if (i < analyzingLine.Length)
-        {
-            Console.WriteLine($"Incorrect symbol - {analyzingLine[i]}");
-            return false;
-        }
+        if (i >= analyzingLine.Length)
+            return true;
 
-        return true;
+        Console.WriteLine($"Incorrect symbol - {analyzingLine[i]}");
+        return false;
     }
 
     public string ReadState(string analyzingLine, ref int index)
@@ -90,7 +87,7 @@ internal class CodeAnalyzer : IAnalyzer
             index++;
             if (analyzingLine.Length == index) break;
         }
+
         return state;
     }
 }
-

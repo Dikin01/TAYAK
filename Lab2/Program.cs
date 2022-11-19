@@ -2,36 +2,32 @@
 
 public static class Program
 {
-    private static readonly string directory = Path.GetFullPath(Directory.GetCurrentDirectory() + @"../../../../");
-    private static readonly List<char> Alphabet = new List<char>() { '\\', '/','a','+', 'd', '\"', 'c' ,'e', 'f', 'g','b' , '8', '*', '0', '1' };
-    static void Main()
+    private static readonly string Directory =
+        Path.GetFullPath(System.IO.Directory.GetCurrentDirectory() + @"../../../../");
+
+    private static readonly List<char> Alphabet = new()
+        { '\\', '/', 'a', '+', 'd', '\"', 'c', 'e', 'f', 'g', 'b', '8', '*', '0', '1' };
+
+    private static void Main()
     {
-        var fileManager = new FileManager(Path.Combine(directory, "var2.txt"));
+        var fileManager = new FileManager(Path.Combine(Directory, "var2.txt"));
 
         fileManager.ReadFileByLines();
 
         CodeAnalyzer codeAnalyzer = new(Alphabet);
-        if (!codeAnalyzer.IsAutomatDescriptionCorrect(fileManager.FileLines))
+        if (!codeAnalyzer.IsAutomateDescriptionCorrect(fileManager.FileLines!))
             return;
 
-        Automate automate = new Automate(fileManager.FileLines, Alphabet);
+        var automate = new Automate(fileManager.FileLines!);
 
-        if (automate.IsAutomateDeterministic())
-            Console.WriteLine("Automate is Deterministic.\n");
-        else 
-            Console.WriteLine("Automate is not Deterministic.\n");
-        
+        Console.WriteLine(automate.IsAutomateDeterministic()
+            ? "Automate is Deterministic.\n"
+            : "Automate is not Deterministic.\n");
+
         automate.PrintTransitionFunctions();
-        automate.Determization();
+        automate.Determination();
         automate.PrintTransitionFunctions();
 
-        if (automate.IsExecutableForInputLine("ada"))
-            Console.WriteLine("Is executable");
-        else
-            Console.WriteLine("Is NOT executable");
-
-        
+        Console.WriteLine(automate.IsExecutableForInputLine(Console.ReadLine()!) ? "Is executable" : "Is NOT executable");
     }
 }
-
-

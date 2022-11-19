@@ -3,7 +3,7 @@ using Lab2;
 
 internal class TextAnalyzer : IAnalyzer
 {
-    public bool IsAutomatDescriptionCorrect(List<string> inputLines)
+    public bool IsAutomateDescriptionCorrect(List<string> inputLines)
     {
         foreach (var line in inputLines)
             if (!IsDescriptionLineCorrect(line)) 
