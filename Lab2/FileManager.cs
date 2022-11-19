@@ -4,19 +4,10 @@ public class FileManager
     private readonly FileInfo _fileInfo;
     public List<string>? FileLines { get; private set; }
 
-    public FileManager(string path)
-    {
-        if (!File.Exists(path))
-            throw new FileNotFoundException($"File not found at path {path}");
-
-        _fileInfo = new FileInfo(path);
-    }
+    public FileManager(string path) => _fileInfo = new FileInfo(path);
 
     public void ReadFileByLines()
     {
-        if (!File.Exists(_fileInfo.FullName))
-            throw new FileNotFoundException($"File not found at path {_fileInfo.FullName}");
-
         var stringArray = File.ReadAllLines(_fileInfo.FullName);
         FileLines = new List<string>(stringArray);
     }

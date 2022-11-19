@@ -6,7 +6,7 @@ public static class Program
         Path.GetFullPath(System.IO.Directory.GetCurrentDirectory() + @"../../../../");
 
     private static readonly List<char> Alphabet = new()
-        { '\\', '/', 'a', '+', 'd', '\"', 'c', 'e', 'f', 'g', 'b', '8', '*', '0', '1' };
+        { '\\', '/', 'a', '+', 'd', '\"', 'c', 'e', 'f', 'g', 'b', '8', '*', '0', '1', 'h', 'm', 'z' };
 
     private static void Main()
     {
@@ -28,6 +28,13 @@ public static class Program
         automate.Determination();
         automate.PrintTransitionFunctions();
 
-        Console.WriteLine(automate.IsExecutableForInputLine(Console.ReadLine()!) ? "Is executable" : "Is NOT executable");
+        while (true)
+        {
+            var input = Console.ReadLine();
+            if (input is null or "")
+                break;
+
+            Console.WriteLine(automate.IsExecutableForInputLine(input!) ? "Is executable" : "Is NOT executable");
+        }
     }
 }
