@@ -1,19 +1,32 @@
-﻿namespace Lab3;
-using Lab2;
+﻿using Lab2;
 
+namespace Lab3;
 
 public static class Program
 {
-    private static readonly string directory = Path.GetFullPath(Directory.GetCurrentDirectory() + @"../../../../");
-    private static readonly List<string> _alphabet = new() { "a", "+", "*", ")", "(", "a"};
+    private static readonly string Directory = Path.GetFullPath(System.IO.Directory.GetCurrentDirectory() + @"../../../../");
+    private static readonly List<string> Alphabet = new() { 
+        "a", "+", "*", ")", "(",
+        "x", "y", "b", 
+        "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" };
+    
     static void Main()
     {
-        var fileManager = new FileManager(Path.Combine(directory, "test4.txt"));
+        var fileManager = new FileManager(Path.Combine(Directory, "test2.txt"));
         fileManager.ReadFileByLines();
-        var stack = new List<string>() { "h0", "E"};
+        var stack = new List<string> { "h0", "E"};
 
-        PushdownAutomat pushdownAutomat = new(fileManager.FileLines, _alphabet);
-        if (pushdownAutomat.IsPAExecutable("a+a*a", stack)) Console.WriteLine("Pushdown automata is executable!");
-        else Console.WriteLine("Pushdown automata is NOT executable!");
+        var input = Console.ReadLine();
+        
+        while (input is not null or "")
+        {
+            PushDownAutomate automate = new(fileManager.FileLines, Alphabet);
+            Console.WriteLine(automate.IsPAExecutable(input, stack)
+                ? "Pushdown automate is executable!"
+                : "Pushdown automate is NOT executable!");
+
+            input = Console.ReadLine();
+        }    
+            
     }
 }

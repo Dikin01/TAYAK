@@ -1,23 +1,23 @@
 ﻿namespace Lab3;
 
-internal class PushdownAutomat
+public class PushDownAutomate
 {
-    HashSet<string> States = new();
-    HashSet<string> Alphabet = new();
-    HashSet<string> StackAlphabet = new();
-    Stack<string> Stack = new();
-    string _startState = "s0";
-    HashSet<string> FinalStates = new() { "s0" };
-    HashSet<TransitionFunction> TransitionFunctions = new();
-    string _stackButton = "h0";
+    private readonly HashSet<string> _states = new();
+    private readonly HashSet<string> _alphabet = new();
+    private readonly HashSet<string> _stackAlphabet = new();
+    private readonly Stack<string> _stack = new();
+    private const string StartState = "s0";
+    private readonly HashSet<string> _finalStates = new() { "s0" };
+    private readonly HashSet<TransitionFunction> _transitionFunctions = new();
+    private const string StackButton = "h0";
 
-    public PushdownAutomat(List<string> fileLines, List<string> alphabet)
+    public PushDownAutomate(List<string> fileLines, List<string> alphabet)
     {
-        States.Add(_startState);
+        _states.Add(StartState);
 
-        Alphabet = alphabet.ToHashSet();
-        StackAlphabet = alphabet.ToHashSet();
-        StackAlphabet.Add(_stackButton);
+        _alphabet = alphabet.ToHashSet();
+        _stackAlphabet = alphabet.ToHashSet();
+        _stackAlphabet.Add(StackButton);
 
         foreach (var line in fileLines)
             ExecuteDescriptionLine(line);
@@ -31,13 +31,13 @@ internal class PushdownAutomat
 
     private void PrintAlphabet()
     {
-        foreach(var v in Alphabet)
+        foreach(var v in _alphabet)
             Console.WriteLine(v);
     }
 
     private void PrintTransactionFunctions()
     {
-        foreach (var tf in TransitionFunctions)
+        foreach (var tf in _transitionFunctions)
         {
             Console.WriteLine($"{tf.CurrentState}, {tf.InputSymbol}, {tf.StackSymbol} = {tf.NextState}, {tf.StackOutputSymbols}");
         }
@@ -46,46 +46,46 @@ internal class PushdownAutomat
     private void ExecuteDescriptionLine(string inputLine)
     {
         var leftPart = inputLine.Substring(0, inputLine.IndexOf('>'));
-        StackAlphabet.Add(leftPart);
+        _stackAlphabet.Add(leftPart);
 
         var rightParts = inputLine.Substring(inputLine.IndexOf('>') + 1, inputLine.Length - leftPart.Length - 1).Split('|');
         foreach(var rightPartToStack in rightParts)
         {
             var rightPartChars = rightPartToStack.ToCharArray();
             Array.Reverse(rightPartChars);
-            TransitionFunctions.Add(new TransitionFunction(_startState, "~", leftPart, _startState, new string(rightPartChars)));
+            _transitionFunctions.Add(new TransitionFunction(StartState, "~", leftPart, StartState, new string(rightPartChars)));
         }
     }
 
     private void AddTerminalTransFunctions()
     {
-        foreach(var letter in Alphabet)
-            TransitionFunctions.Add(new TransitionFunction(_startState, letter, letter, _startState, "~"));
+        foreach(var letter in _alphabet)
+            _transitionFunctions.Add(new TransitionFunction(StartState, letter, letter, StartState, "~"));
     }
 
     private void AddFinalStateTransFunction()
     {
-        TransitionFunctions.Add(new TransitionFunction(_startState, "~", _stackButton, _startState, "~"));
+        _transitionFunctions.Add(new TransitionFunction(StartState, "~", StackButton, StartState, "~"));
     }
 
     public bool IsPAExecutable(string inputLine, List<string> stackSymbols)
     {
-        var curState = _startState;
+        var curState = StartState;
         Queue<Configuration> queue = new();
 
 
         foreach (var symbol in stackSymbols)
-            Stack.Push(symbol);
+            _stack.Push(symbol);
        
 
-        queue.Enqueue(new Configuration(curState, inputLine, Stack, null));
+        queue.Enqueue(new Configuration(curState, inputLine, _stack, null));
 
 
         while(queue.Count != 0)
         {
             var curConfig = queue.Dequeue();
 
-            if (FinalStates.Contains(curConfig.State) && curConfig.Stack.Count() == 0 && curConfig.InputLine == "")  return true;
+            if (_finalStates.Contains(curConfig.State) && curConfig.Stack.Count() == 0 && curConfig.InputLine == "")  return true;
             if (curConfig.Stack.Count() == 0) continue;
             if (curConfig.InputLine == "" && curConfig.Stack.Count() != 1) continue;
            
@@ -93,7 +93,7 @@ internal class PushdownAutomat
 
             if(curConfig.InputLine != "")
             {
-                if (!StackAlphabet.Contains(curConfig.InputLine[0].ToString()))
+                if (!_stackAlphabet.Contains(curConfig.InputLine[0].ToString()))
                 {
                     Console.WriteLine($"Incorrect symbol - {curConfig.InputLine[0]}");
                     return false;
@@ -101,7 +101,7 @@ internal class PushdownAutomat
             }
             
 
-            var tfWithEmptySyms = TransitionFunctions.Where(tf => tf.CurrentState == curConfig.State &&
+            var tfWithEmptySyms = _transitionFunctions.Where(tf => tf.CurrentState == curConfig.State &&
                                                                    tf.StackSymbol == curStackSymbol && 
                                                                    tf.InputSymbol == "~");
             if(tfWithEmptySyms.Count() > 0)
@@ -113,7 +113,7 @@ internal class PushdownAutomat
             }
             else
             {
-                foreach(var tf in TransitionFunctions)
+                foreach(var tf in _transitionFunctions)
                 {
                     var sym = curConfig.InputLine[0].ToString();
                     if (tf.CurrentState == curConfig.State && tf.InputSymbol == sym && tf.StackSymbol == curStackSymbol)
