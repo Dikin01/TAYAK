@@ -1,0 +1,18 @@
+﻿<block>
+	<column BgColor="5">
+		<row>
+			<block>
+				<row Height="10">
+					<column Width="5" Valign="Center" Halign="Center" BgColor="4">A</column>
+					<column BgColor="3" Halign="Right">B</column>
+				</row>
+				<row>
+					<column BgColor="2">C</column>
+					<column BgColor="6">D</column>
+				</row>
+			</block>
+		</row>
+		<row>F</row>
+	</column>
+	<column BgColor="7" Valign="Bottom" TextColor="10">E</column>
+</block>
